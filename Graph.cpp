@@ -187,11 +187,23 @@ bool Graph::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 				cr->stroke();
 				cr->unset_dash();
 
-				//Draw text
+				//Format text
 				char buf[32];
 				sprintf(buf, "%d:%02d", dt / 60, dt % 60);
 				cr->set_line_width(1.0);
-				DrawString(pos - 20, m_bottom + 5, cr, buf, m_font);
+
+				//Calculate text size
+				int xw, yw;
+				GetStringWidth(cr, buf, xw, yw, m_font);
+
+				//Draw it
+				int texty = m_bottom + 5;
+				DrawString(pos - 20, texty, cr, buf, m_font);
+
+				//Bump margins if we don't fit
+				int textbot = texty + yw;
+				if(m_bmargin < (yw+5))
+					m_bmargin = yw+5;
 			}
 			for(float i=m_minScale + m_scaleBump; i<=m_maxScale; i += m_scaleBump)		//Horizontal grid lines
 			{
@@ -208,7 +220,7 @@ bool Graph::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 				cr->stroke();
 				cr->unset_dash();
 
-				//Draw text
+				//Format text
 				char buf[32];
 				sprintf(buf, "%.0f %s", i * m_unitScale, m_units.c_str());
 				if(m_unitScale <= 0.1)
@@ -218,7 +230,18 @@ bool Graph::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 				if(m_unitScale <= 0.001)
 					sprintf(buf, "%.3f %s", i * m_unitScale, m_units.c_str());
 				cr->set_line_width(1.0);
-				DrawString(m_left - 60, pos - 5, cr, buf, m_font);
+
+				//Calculate text size
+				int xw, yw;
+				GetStringWidth(cr, buf, xw, yw, m_font);
+
+				//Draw it
+				int xleft = m_left - xw - 5;
+				DrawString(xleft, pos - 5, cr, buf, m_font);
+
+				//bump margins if we need to
+				if(xleft < 5)
+					m_lmargin = xw + 5;
 			}
 
 			//Draw Y axis title

@@ -125,10 +125,10 @@ protected:
 	float m_bodywidth;
 	float m_bodyheight;
 
-	const int m_lmargin;
-	const int m_rmargin;
-	const int m_tmargin;
-	const int m_bmargin;
+	int m_lmargin;
+	int m_rmargin;
+	int m_tmargin;
+	int m_bmargin;
 
 	double m_now;
 };
