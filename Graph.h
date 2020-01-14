@@ -98,6 +98,8 @@ public:
 
 	std::string m_yAxisTitle;
 
+	Pango::FontDescription m_font;
+
 protected:
 	virtual bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr);
 
@@ -133,8 +135,23 @@ protected:
 
 double GetTime();
 
-void DrawString(float x, float y, const Cairo::RefPtr<Cairo::Context>& cr, std::string str, bool bBig);
-void DrawStringVertical(float x, float y, const Cairo::RefPtr<Cairo::Context>& cr, std::string str, bool bBig);
-void GetStringWidth(const Cairo::RefPtr<Cairo::Context>& cr, std::string str, bool bBig, int& width, int& height);
+void DrawString(
+	float x,
+	float y,
+	const Cairo::RefPtr<Cairo::Context>& cr,
+	std::string str,
+	const Pango::FontDescription& font);
+void DrawStringVertical(
+	float x,
+	float y,
+	const Cairo::RefPtr<Cairo::Context>& cr,
+	std::string str,
+	const Pango::FontDescription& font);
+void GetStringWidth(
+	const Cairo::RefPtr<Cairo::Context>& cr,
+	std::string str,
+	int& width,
+	int& height,
+	const Pango::FontDescription& font);
 
 #endif
