@@ -61,7 +61,7 @@ Graphable::~Graphable()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Graph::Graph()
+Graph::Graph(size_t update_ms)
 : m_font("sans normal 8")
 , m_lmargin(70)
 , m_rmargin(20)
@@ -72,7 +72,7 @@ Graph::Graph()
 
 	//Set our timer
 	sigc::slot<bool> slot = sigc::bind(sigc::mem_fun(*this, &Graph::OnTimer), 1);
-	sigc::connection conn = Glib::signal_timeout().connect(slot, 100);
+	sigc::connection conn = Glib::signal_timeout().connect(slot, update_ms);
 
 	m_minScale = 0;
 	m_maxScale = 100;
@@ -82,6 +82,8 @@ Graph::Graph()
 	m_timeScale = 10;
 	m_timeTick = 10;
 	m_drawLegend = true;
+
+	m_lineWidth = 1;
 
 	//Redlines default to off scale
 	m_minRedline = -1;
@@ -295,7 +297,7 @@ bool Graph::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 
 void Graph::DrawSeries(Series* pSeries, const Cairo::RefPtr<Cairo::Context>& cr, Gdk::Color color)
 {
-	//Draw it
+	cr->set_line_width(m_lineWidth);
 	cr->set_source_rgb(color.get_red_p(), color.get_green_p(), color.get_blue_p());
 
 	cr->save();

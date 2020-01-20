@@ -74,7 +74,7 @@ public:
 class Graph : public Gtk::Layout
 {
 public:
-	Graph();
+	Graph(size_t update_ms = 100);
 	~Graph();
 
 	//Configurable by parent
@@ -93,6 +93,8 @@ public:
 
 	float m_timeScale;
 	float m_timeTick;
+
+	float m_lineWidth;
 
 	bool m_drawLegend;
 
