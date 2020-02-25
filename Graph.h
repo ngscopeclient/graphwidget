@@ -74,7 +74,7 @@ public:
 class Graph : public Gtk::Layout
 {
 public:
-	Graph();
+	Graph(size_t update_ms = 100);
 	~Graph();
 
 	//Configurable by parent
@@ -94,9 +94,13 @@ public:
 	float m_timeScale;
 	float m_timeTick;
 
+	float m_lineWidth;
+
 	bool m_drawLegend;
 
 	std::string m_yAxisTitle;
+
+	Pango::FontDescription m_font;
 
 protected:
 	virtual bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr);
@@ -123,18 +127,33 @@ protected:
 	float m_bodywidth;
 	float m_bodyheight;
 
-	const int m_lmargin;
-	const int m_rmargin;
-	const int m_tmargin;
-	const int m_bmargin;
+	int m_lmargin;
+	int m_rmargin;
+	int m_tmargin;
+	int m_bmargin;
 
 	double m_now;
 };
 
 double GetTime();
 
-void DrawString(float x, float y, const Cairo::RefPtr<Cairo::Context>& cr, std::string str, bool bBig);
-void DrawStringVertical(float x, float y, const Cairo::RefPtr<Cairo::Context>& cr, std::string str, bool bBig);
-void GetStringWidth(const Cairo::RefPtr<Cairo::Context>& cr, std::string str, bool bBig, int& width, int& height);
+void DrawString(
+	float x,
+	float y,
+	const Cairo::RefPtr<Cairo::Context>& cr,
+	std::string str,
+	const Pango::FontDescription& font);
+void DrawStringVertical(
+	float x,
+	float y,
+	const Cairo::RefPtr<Cairo::Context>& cr,
+	std::string str,
+	const Pango::FontDescription& font);
+void GetStringWidth(
+	const Cairo::RefPtr<Cairo::Context>& cr,
+	std::string str,
+	int& width,
+	int& height,
+	const Pango::FontDescription& font);
 
 #endif

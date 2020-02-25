@@ -40,9 +40,6 @@ using namespace std;
 
 double GetTime();
 
-void DrawStringVertical(float x, float y, const Cairo::RefPtr<Cairo::Context>& cr, string str, bool bBig);
-void GetStringWidth(const Cairo::RefPtr<Cairo::Context>& cr, std::string str, bool bBig, int& width, int& height);
-
 Series* Graphable::GetSeries(std::string name)
 {
 	if(m_series.find(name) == m_series.end())
@@ -64,15 +61,18 @@ Graphable::~Graphable()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Graph::Graph()
-: m_lmargin(70)
+Graph::Graph(size_t update_ms)
+: m_font("sans normal 8")
+, m_lmargin(70)
 , m_rmargin(20)
 , m_tmargin(10)
 , m_bmargin(20)
 {
+	m_font.set_weight(Pango::WEIGHT_NORMAL);
+
 	//Set our timer
 	sigc::slot<bool> slot = sigc::bind(sigc::mem_fun(*this, &Graph::OnTimer), 1);
-	sigc::connection conn = Glib::signal_timeout().connect(slot, 100);
+	sigc::connection conn = Glib::signal_timeout().connect(slot, update_ms);
 
 	m_minScale = 0;
 	m_maxScale = 100;
@@ -82,6 +82,8 @@ Graph::Graph()
 	m_timeScale = 10;
 	m_timeTick = 10;
 	m_drawLegend = true;
+
+	m_lineWidth = 1;
 
 	//Redlines default to off scale
 	m_minRedline = -1;
@@ -124,7 +126,7 @@ bool Graph::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 			for(size_t i=0; i<m_series.size(); i++)
 			{
 				int w, h;
-				GetStringWidth(cr, m_series[i]->m_name, false, w, h);
+				GetStringWidth(cr, m_series[i]->m_name, w, h, m_font);
 				if(w > legendw)
 					legendw = w;
 				lineheight = legendvspace + h;
@@ -187,11 +189,23 @@ bool Graph::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 				cr->stroke();
 				cr->unset_dash();
 
-				//Draw text
+				//Format text
 				char buf[32];
 				sprintf(buf, "%d:%02d", dt / 60, dt % 60);
 				cr->set_line_width(1.0);
-				DrawString(pos - 20, m_bottom + 5, cr, buf, false);
+
+				//Calculate text size
+				int xw, yw;
+				GetStringWidth(cr, buf, xw, yw, m_font);
+
+				//Draw it
+				int texty = m_bottom + 5;
+				DrawString(pos - 20, texty, cr, buf, m_font);
+
+				//Bump margins if we don't fit
+				int textbot = texty + yw;
+				if(m_bmargin < (yw+5))
+					m_bmargin = yw+5;
 			}
 			for(float i=m_minScale + m_scaleBump; i<=m_maxScale; i += m_scaleBump)		//Horizontal grid lines
 			{
@@ -208,7 +222,7 @@ bool Graph::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 				cr->stroke();
 				cr->unset_dash();
 
-				//Draw text
+				//Format text
 				char buf[32];
 				sprintf(buf, "%.0f %s", i * m_unitScale, m_units.c_str());
 				if(m_unitScale <= 0.1)
@@ -218,11 +232,22 @@ bool Graph::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 				if(m_unitScale <= 0.001)
 					sprintf(buf, "%.3f %s", i * m_unitScale, m_units.c_str());
 				cr->set_line_width(1.0);
-				DrawString(m_left - 60, pos - 5, cr, buf, false);
+
+				//Calculate text size
+				int xw, yw;
+				GetStringWidth(cr, buf, xw, yw, m_font);
+
+				//Draw it
+				int xleft = m_left - xw - 5;
+				DrawString(xleft, pos - 5, cr, buf, m_font);
+
+				//bump margins if we need to
+				if(xleft < 5)
+					m_lmargin = xw + 5;
 			}
 
 			//Draw Y axis title
-			DrawStringVertical(10, m_bodyheight / 2, cr, m_yAxisTitle, false);
+			DrawStringVertical(10, m_bodyheight / 2, cr, m_yAxisTitle, m_font);
 
 			//Draw lines for each child
 			for(size_t i=0; i<m_series.size(); i++)
@@ -258,7 +283,7 @@ bool Graph::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 						y,
 						cr,
 						pSeries->m_name,
-						false);
+						m_font);
 
 					y += lineheight;
 				}
@@ -272,7 +297,7 @@ bool Graph::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 
 void Graph::DrawSeries(Series* pSeries, const Cairo::RefPtr<Cairo::Context>& cr, Gdk::Color color)
 {
-	//Draw it
+	cr->set_line_width(m_lineWidth);
 	cr->set_source_rgb(color.get_red_p(), color.get_green_p(), color.get_blue_p());
 
 	cr->save();
@@ -342,18 +367,18 @@ double GetTime()
 	return d;
 }
 
-void DrawStringVertical(float x, float y, const Cairo::RefPtr<Cairo::Context>& cr, string str, bool bBig)
+void DrawStringVertical(
+	float x,
+	float y,
+	const Cairo::RefPtr<Cairo::Context>& cr,
+	string str,
+	const Pango::FontDescription& font)
 {
 	cr->save();
 
 		cr->set_line_width(1.0);
 
 		Glib::RefPtr<Pango::Layout> tlayout = Pango::Layout::create (cr);
-		string desc = "sans normal 8";
-		if(bBig)
-			desc = "sans normal 10";
-		Pango::FontDescription font(desc);
-		font.set_weight(Pango::WEIGHT_LIGHT);
 		tlayout->set_font_description(font);
 		tlayout->set_text(str);
 
@@ -374,23 +399,23 @@ void DrawStringVertical(float x, float y, const Cairo::RefPtr<Cairo::Context>& c
 /**
 	@brief Draws a string
 
-	@param x X coordinate
-	@param y Y position
-	@param cr Cairo context
-	@param str String to draw
-	@param bBig Font size selector (small or large)
+	@param x	X coordinate
+	@param y	Y position
+	@param cr	Cairo context
+	@param str	String to draw
+	@param font	The font to use
  */
-void DrawString(float x, float y, const Cairo::RefPtr<Cairo::Context>& cr, string str, bool bBig)
+void DrawString(
+	float x,
+	float y,
+	const Cairo::RefPtr<Cairo::Context>& cr,
+	string str,
+	const Pango::FontDescription& font)
 {
 	cr->save();
 
 		Glib::RefPtr<Pango::Layout> tlayout = Pango::Layout::create (cr);
 		cr->move_to(x, y);
-		string desc = "sans normal 8";
-		if(bBig)
-			desc = "sans normal 10";
-		Pango::FontDescription font(desc);
-		font.set_weight(Pango::WEIGHT_NORMAL);
 		tlayout->set_font_description(font);
 		tlayout->set_text(str);
 		tlayout->update_from_cairo_context(cr);
@@ -399,16 +424,15 @@ void DrawString(float x, float y, const Cairo::RefPtr<Cairo::Context>& cr, strin
 	cr->restore();
 }
 
-void GetStringWidth(const Cairo::RefPtr<Cairo::Context>& cr, std::string str, bool bBig, int& width, int& height)
+void GetStringWidth(
+	const Cairo::RefPtr<Cairo::Context>& cr,
+	string str,
+	int& width,
+	int& height,
+	const Pango::FontDescription& font)
 {
 	Glib::RefPtr<Pango::Layout> tlayout = Pango::Layout::create (cr);
-	string desc = "sans normal 8";
-	if(bBig)
-		desc = "sans normal 10";
-	Pango::FontDescription font(desc);
-	font.set_weight(Pango::WEIGHT_NORMAL);
 	tlayout->set_font_description(font);
 	tlayout->set_text(str);
-
 	tlayout->get_pixel_size(width, height);
 }
