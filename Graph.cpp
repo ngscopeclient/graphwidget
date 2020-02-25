@@ -196,7 +196,7 @@ bool Graph::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 			for(float i=m_minScale + m_scaleBump; i<=m_maxScale; i += m_scaleBump)		//Horizontal grid lines
 			{
 				//Get current position
-				float pos = valueToPosition(i);
+				pos = valueToPosition(i);
 
 				//Draw line
 				int ipos = static_cast<int>(pos);
