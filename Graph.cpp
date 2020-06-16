@@ -208,14 +208,13 @@ bool Graph::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 				DrawString(pos - 20, texty, cr, buf, m_font);
 
 				//Bump margins if we don't fit
-				int textbot = texty + yw;
 				if(m_bmargin < (yw+5))
 					m_bmargin = yw+5;
 			}
 			for(float i=m_minScale + m_scaleBump; i<=m_maxScale; i += m_scaleBump)		//Horizontal grid lines
 			{
 				//Get current position
-				float pos = valueToPosition(i);
+				pos = valueToPosition(i);
 
 				//Draw line
 				int ipos = static_cast<int>(pos);
