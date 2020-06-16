@@ -191,7 +191,12 @@ bool Graph::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 
 				//Format text
 				char buf[32];
-				sprintf(buf, "%d:%02d", dt / 60, dt % 60);
+				if(m_timeTick < 3600)		//m:s
+					sprintf(buf, "%d:%02d", dt / 60, dt % 60);
+				else if(m_timeTick < 86400)	//h:m
+					sprintf(buf, "%d:%02d", dt / 3600, (dt % 3600) / 60 );
+				else						//days
+					sprintf(buf, "%d", dt / 86400);
 				cr->set_line_width(1.0);
 
 				//Calculate text size
