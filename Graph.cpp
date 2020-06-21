@@ -33,6 +33,11 @@
 	@brief Implementation of Graph
  */
 
+#ifdef _WIN32
+#define _USE_MATH_DEFINES
+#include <cmath>
+#endif
+
 #include "Graph.h"
 #include <cairomm/context.h>
 
