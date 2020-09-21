@@ -34,7 +34,9 @@
  */
 
 #ifdef _WIN32
+#ifndef _USE_MATH_DEFINES
 #define _USE_MATH_DEFINES
+#endif
 #include <cmath>
 #endif
 
