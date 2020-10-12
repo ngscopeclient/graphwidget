@@ -49,17 +49,17 @@ void DrawString(
 	float x,
 	float y,
 	const Cairo::RefPtr<Cairo::Context>& cr,
-	std::string str,
+	const string& str,
 	const Pango::FontDescription& font);
 void DrawStringVertical(
 	float x,
 	float y,
 	const Cairo::RefPtr<Cairo::Context>& cr,
-	std::string str,
+	const string& str,
 	const Pango::FontDescription& font);
 void GetStringWidth(
 	const Cairo::RefPtr<Cairo::Context>& cr,
-	std::string str,
+	const string& str,
 	int& width,
 	int& height,
 	const Pango::FontDescription& font);
@@ -399,7 +399,7 @@ void DrawStringVertical(
 	float x,
 	float y,
 	const Cairo::RefPtr<Cairo::Context>& cr,
-	string str,
+	const string& str,
 	const Pango::FontDescription& font)
 {
 	cr->save();
@@ -437,7 +437,7 @@ void DrawString(
 	float x,
 	float y,
 	const Cairo::RefPtr<Cairo::Context>& cr,
-	string str,
+	const string& str,
 	const Pango::FontDescription& font)
 {
 	cr->save();
@@ -454,7 +454,7 @@ void DrawString(
 
 void GetStringWidth(
 	const Cairo::RefPtr<Cairo::Context>& cr,
-	string str,
+	const string& str,
 	int& width,
 	int& height,
 	const Pango::FontDescription& font)
