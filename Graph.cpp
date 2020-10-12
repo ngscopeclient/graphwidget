@@ -196,11 +196,10 @@ bool Graph::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 			//Draw grid
 			vector<double> dashes;
 			dashes.push_back(1);
-			float pos = m_right;
 			for(int dt=0; ; dt += m_timeTick)	//Vertical grid lines
 			{
 				//Get current position
-				pos = timeToPosition(m_now - dt);
+				float pos = timeToPosition(m_now - dt);
 				if(pos <= m_left)
 					break;
 
@@ -238,7 +237,7 @@ bool Graph::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 			for(float i=m_minScale + m_scaleBump; i<=m_maxScale; i += m_scaleBump)		//Horizontal grid lines
 			{
 				//Get current position
-				pos = valueToPosition(i);
+				float pos = valueToPosition(i);
 
 				//Draw line
 				int ipos = static_cast<int>(pos);
