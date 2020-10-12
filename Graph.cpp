@@ -45,9 +45,26 @@
 
 using namespace std;
 
-double GetTime();
+void DrawString(
+	float x,
+	float y,
+	const Cairo::RefPtr<Cairo::Context>& cr,
+	std::string str,
+	const Pango::FontDescription& font);
+void DrawStringVertical(
+	float x,
+	float y,
+	const Cairo::RefPtr<Cairo::Context>& cr,
+	std::string str,
+	const Pango::FontDescription& font);
+void GetStringWidth(
+	const Cairo::RefPtr<Cairo::Context>& cr,
+	std::string str,
+	int& width,
+	int& height,
+	const Pango::FontDescription& font);
 
-Series* Graphable::GetSeries(std::string name)
+Series* Graphable::GetSeries(const string& name)
 {
 	if(m_series.find(name) == m_series.end())
 		m_series[name] = new Series;

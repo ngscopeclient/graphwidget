@@ -55,13 +55,13 @@ typedef std::map< std::string, Series* > SeriesMap;
 class Graphable
 {
 public:
-	Graphable(std::string name = "")
+	Graphable(const std::string& name = "")
 	: m_name(name)
 	{}
 
 	virtual ~Graphable();
 
-	Series* GetSeries(std::string name);
+	Series* GetSeries(const std::string& name);
 
 	virtual bool visible();
 
@@ -136,24 +136,5 @@ protected:
 };
 
 double GetTime();
-
-void DrawString(
-	float x,
-	float y,
-	const Cairo::RefPtr<Cairo::Context>& cr,
-	std::string str,
-	const Pango::FontDescription& font);
-void DrawStringVertical(
-	float x,
-	float y,
-	const Cairo::RefPtr<Cairo::Context>& cr,
-	std::string str,
-	const Pango::FontDescription& font);
-void GetStringWidth(
-	const Cairo::RefPtr<Cairo::Context>& cr,
-	std::string str,
-	int& width,
-	int& height,
-	const Pango::FontDescription& font);
 
 #endif
