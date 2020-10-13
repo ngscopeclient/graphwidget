@@ -87,6 +87,7 @@ public:
 
 	std::string m_units;
 	float m_unitScale;
+	int m_sigfigs;
 
 	float m_maxRedline;
 	float m_minRedline;
@@ -101,6 +102,9 @@ public:
 	std::string m_yAxisTitle;
 
 	Pango::FontDescription m_font;
+
+	Gdk::Color m_axisColor;
+	Gdk::Color m_backgroundColor;
 
 protected:
 	virtual bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr);

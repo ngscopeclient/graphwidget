@@ -105,7 +105,11 @@ Graph::Graph(size_t update_ms)
 	m_unitScale = 1;
 	m_timeScale = 10;
 	m_timeTick = 10;
+	m_sigfigs = 0;
 	m_drawLegend = true;
+
+	m_axisColor = Gdk::Color("#000000");
+	m_backgroundColor = Gdk::Color("#ffffff");
 
 	m_lineWidth = 1;
 
@@ -162,7 +166,10 @@ bool Graph::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 			cr->clip();
 
 			//Fill background
-			cr->set_source_rgb(1.0, 1.0, 1.0);
+			cr->set_source_rgb(
+				m_backgroundColor.get_red_p(),
+				m_backgroundColor.get_green_p(),
+				m_backgroundColor.get_blue_p());
 			cr->rectangle(m_left, m_top, m_bodywidth, m_bodyheight);
 			cr->fill();
 
@@ -187,7 +194,7 @@ bool Graph::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 
 			//Draw axes
 			cr->set_line_width(1.0);
-			cr->set_source_rgb(0, 0, 0);
+			cr->set_source_rgb(m_axisColor.get_red_p(), m_axisColor.get_green_p(), m_axisColor.get_blue_p());
 			cr->move_to(m_left + 0.5, m_top);
 			cr->line_to(m_left + 0.5, m_bottom + 0.5);
 			cr->line_to(m_right + 0.5, m_bottom + 0.5);
@@ -251,13 +258,22 @@ bool Graph::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 
 				//Format text
 				char buf[32];
-				sprintf(buf, "%.0f %s", i * m_unitScale, m_units.c_str());
-				if(m_unitScale <= 0.1)
-					sprintf(buf, "%.1f %s", i * m_unitScale, m_units.c_str());
-				if(m_unitScale <= 0.01)
-					sprintf(buf, "%.2f %s", i * m_unitScale, m_units.c_str());
-				if(m_unitScale <= 0.001)
-					sprintf(buf, "%.3f %s", i * m_unitScale, m_units.c_str());
+				if(m_sigfigs > 0)
+				{
+					char format[32];
+					snprintf(format, sizeof(format), "%%.%df %%s", m_sigfigs);
+					snprintf(buf, sizeof(buf), format, i*m_unitScale, m_units.c_str());
+				}
+				else
+				{
+					sprintf(buf, "%.0f %s", i * m_unitScale, m_units.c_str());
+					if(m_unitScale <= 0.1)
+						sprintf(buf, "%.1f %s", i * m_unitScale, m_units.c_str());
+					if(m_unitScale <= 0.01)
+						sprintf(buf, "%.2f %s", i * m_unitScale, m_units.c_str());
+					if(m_unitScale <= 0.001)
+						sprintf(buf, "%.3f %s", i * m_unitScale, m_units.c_str());
+				}
 				cr->set_line_width(1.0);
 
 				//Calculate text size
