@@ -67,7 +67,12 @@ void GetStringWidth(
 Series* Graphable::GetSeries(const string& name)
 {
 	if(m_series.find(name) == m_series.end())
+	{
+		//CPPCheck doesn't understand that we're inserting pointers, not objects.
+		//The check is necessary because we only want to create the series once.
+		// cppcheck-suppress stlFindInsert
 		m_series[name] = new Series;
+	}
 	return m_series[name];
 }
 
