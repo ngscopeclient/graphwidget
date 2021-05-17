@@ -12,4 +12,4 @@ target_link_libraries(graphwidget ${SIGCXX_LIBRARIES} ${GTKMM_LIBRARIES})
 target_include_directories(graphwidget
 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-install(TARGETS graphwidget LIBRARY DESTINATION /usr/lib)
+install(TARGETS graphwidget LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
